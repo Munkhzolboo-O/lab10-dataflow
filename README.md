@@ -1,30 +1,38 @@
+# Лаборатори №10 — Өгөгдлийн урсгалын тест (DU хосууд)
 
-# Lab 10 — Data Flow Analysis (DU Pairs)
+**Оюутан:** Oyunsuren Munkhzolboo  
+**Оюутны код:** B210910878
 
-**Student:** Oyunsuren Munkhzolboo  
-**Student ID:** B210910878
+## 1. Төслийн мэдээлэл
 
-## Project
+Энэ лабораторийн ажлаар `gcd()` болон `bonus()` функцийн хувьсагчдын тодорхойлолт (`def`), хэрэглээ (`use`), тэдгээрийн хоорондох `def-clear` замыг шинжилж, JUnit 5 тест болон JaCoCo тайлангаар шалгав. Ашигласан хэрэгслүүд: Java 17+, Maven, JUnit 5, JaCoCo, Git.
 
-- Java 17+
-- Maven
-- JUnit 5
-- JaCoCo
+### Java болон Maven-ийн орчны гаралт
 
-## Verification
+**Нэмэх шаардлагатай:** Өөрийн компьютер дээр ажиллуулсан `java -version` болон `mvn -version` командын **бүтэн, бодит гаралтыг** энд оруулна. Зөвхөн хувилбарын дугаар бичих нь хангалтгүй.
 
-- Tests run: 11
-- Failures: 0
-- Errors: 0
-- Branches covered: 16
-- Branches missed: 0
+## 2. Эцсийн шалгалтын үр дүн
 
-## GCD DU-Pair Analysis
+| Үзүүлэлт | Үр дүн |
+|---|---:|
+| Tests run | 11 |
+| Failures | 0 |
+| Errors | 0 |
+| Skipped | 0 |
+| BRANCH_COVERED | 16 |
+| BRANCH_MISSED | 0 |
+| LINE_COVERED | 23 |
+| LINE_MISSED | 1 |
 
+Эцсийн `mvn verify` амжилттай ажилласан. Branch хамралт 16/16 буюу 100% байна. Хамрагдаагүй нэг мөр нь `DataFlowTargets` классын далд constructor-той холбоотой бөгөөд даалгаврын зааварт зөвшөөрсөн тохиолдол юм.
 
-The gcd() method contains 11 DU pairs.
+Нотолгоо: `results/mvn-verify-final.txt`, `results/jacoco-final.csv`.
 
-| Variable | Def | Use | Type | Def-clear path |
+## 3. Хэсэг A — `gcd()` функцийн DU шинжилгээ
+
+`gcd()` функцэд `x`, `y`, `tmp` хувьсагчдын нийт 11 DU хосыг дараах хүснэгтэд бүртгэсэн. Мөрийн дугаар нь `DataFlowTargets.java` файлын дугаартай тохирно.
+
+| Хувьсагч | Def мөр | Use мөр | Төрөл | Def-clear зам |
 |---|---|---|---|---|
 | x | 13 | 16 | c-use | 13 → 15 → 16 |
 | x | 13 | 20 | c-use | 13 → 15 → 20 |
@@ -38,14 +46,27 @@ The gcd() method contains 11 DU pairs.
 | y | 18 | 17 | c-use | 18 → 15 → 16 → 17 |
 | tmp | 16 | 18 | c-use | 16 → 17 → 18 |
 
+### Тестүүдийн тайлбар
 
-## Bonus DU-Pair Analysis
+- `gcd_zeroIterations_x13_to20_y13_to15` — давталт огт хийгдэхгүй (`gcd(7,0)`).
+- `gcd_oneIteration_x13_to16_y13_to17_tmp16_to18` — нэг давталт (`gcd(10,5)`).
+- `gcd_multipleIterations_x17_to16_y18_to17` — олон давталт (`gcd(12,8)`).
 
-D = definition, U = use.
-c-use = computation use, p-use = predicate use.
-A kill occurs when a variable is redefined.
+**Дуусгах шаардлагатай:** Дээрх хүснэгтэд `Тестийн ID`, `Хамрагдсан эсэх` багана нэмээд 11 хос тус бүрийг бодит тесттэй тулган баталгаажуулах.
 
-| Variable | Definition lines | Use lines |
+## 4. Хэсэг B — `bonus()` функцийн шинжилгээ
+
+### 4.1 CFG (Control Flow Graph)
+
+Удирдлагын урсгалын зураг: `cfg-bonus.png`.
+
+**Шалгах шаардлагатай:** Зургийн бүх зангилаа эх кодын мөрийн дугаартай, ирмэгүүд нь тэдгээрээр дамждаг бодит JUnit тестийн методын нэртэй эсэхийг тулгах. `foreach`-ийн 38-р мөр нь дараагийн элемент байгаа эсэхийг шалгах нөхцөл болон `a` хувьсагчид элемент оноох алхамтай.
+
+### 4.2 Def/Use жагсаалт
+
+`D` — хувьсагчид утга оноох; `U` — хувьсагчийг хэрэглэх; `c-use` — тооцоололд хэрэглэх; `p-use` — нөхцөл шалгахад хэрэглэх. Хувьсагчид дахин утга онооход өмнөх тодорхойлолтыг `kill` хийнэ.
+
+| Хувьсагч | Def мөрүүд | Use мөрүүд |
 |---|---|---|
 | attendance | 31 | 32 (p), 38 (c) |
 | threshold | 31 | 32 (p), 50 (p) |
@@ -55,90 +76,129 @@ A kill occurs when a variable is redefined.
 | best | 37, 43 | 42 (p), 53 (p) |
 | score | 49, 51, 54 | 54 (c), 56 (c) |
 
-### Kill examples
+**Нарийвчлах шаардлагатай:** `attendance`-ийн 38-р мөр дэх давталтын нөхцөлийг `p-use` гэж ялгаж, `present`, `streak`, `best`, `score` хувьсагчдын мөр бүрийн `def` ба `use`-ийг эх кодтой тулган шалгах.
 
-- Line 40 redefines `present`, killing its previous definition.
-- Lines 41 and 46 redefine `streak`.
-- Line 43 redefines `best`.
-- Lines 51 and 54 redefine `score`.
+### 4.3 Бодит тестүүдийн ID
 
-### Tested scenarios
+| ID | JUnit тест | Оролт |
+|---|---|---|
+| T1 | `bonus_noConditionsMet_returnsZero` | `[1,0,1,0]`, threshold=3 |
+| T2 | `bonus_thresholdMet_returnsFive` | `[1,0,1,0]`, threshold=2 |
+| T3 | `bonus_fiveConsecutive_returnsThree` | `[1,1,1,1,1]`, threshold=6 |
+| T4 | `bonus_bothConditionsMet_returnsEight` | `[1,1,1,1,1]`, threshold=5 |
+| T5 | `bonus_emptyAttendance_returnsZero` | `[]`, threshold=1 |
+| T6 | `bonus_nullAttendance_throwsException` | `null`, threshold=3 |
+| T7 | `bonus_negativeThreshold_throwsException` | `[1,1]`, threshold=-1 |
+| T8 | `bonus_streakReset_returnsZero` | `[1,1,0,1,1,1]`, threshold=7 |
 
-- Empty attendance array
-- Threshold not met
-- Threshold met
-- Five consecutive positive attendance values
-- Both bonus conditions met
-- Streak reset
-- Null attendance
-- Negative threshold
+### 4.4 DU хосын ажлын хүснэгт
 
+Доорх хүснэгт нь өмнөх README-д байсан DU хосуудыг хадгалсан **ажлын хувилбар** юм. `def-clear` замд тухайн хувьсагч дахин тодорхойлогдохгүй байх ёстой. Энэ хүснэгтийг бүх боломжит DU хос бүрэн хамрагдсан гэсэн нотолгоо гэж үзээгүй.
 
+| Хувьсагч | Def мөр | Use мөр | Төрөл | Def-clear зам | Тестийн ID |
+|---|---:|---:|---|---|---|
+| attendance | 31 | 32 | p-use | 31 → 32 | T1, T6 |
+| attendance | 31 | 38 | p-use | 31 → 32 → 38 | T1, T5 |
+| threshold | 31 | 32 | p-use | 31 → 32 | T1, T7 |
+| threshold | 31 | 50 | p-use | 31 → 32 → 38 → 49 → 50 | T1, T2, T5 |
+| a | 38 | 39 | p-use | 38 → 39 | T1, T3 |
+| present | 35 | 40 | c-use | 35 → 38 → 39 → 40 | T1, T3 |
+| present | 35 | 50 | p-use | 35 → 38 → 49 → 50 | T5 |
+| present | 40 | 40 | c-use | 40 → 38 → 39 → 40 | T3 |
+| present | 40 | 50 | p-use | 40 → 38 → 49 → 50 | T1, T2 |
+| streak | 36 | 41 | c-use | 36 → 38 → 39 → 41 | T1, T3 |
+| streak | 41 | 41 | c-use | 41 → 38 → 39 → 41 | T3 |
+| streak | 41 | 42 | p-use | 41 → 42 | T1, T3 |
+| streak | 41 | 43 | c-use | 41 → 42 → 43 | T1, T3 |
+| streak | 46 | 41 | c-use | 46 → 38 → 39 → 41 | T1, T8 |
+| best | 37 | 42 | p-use | 37 → 38 → 39 → 41 → 42 | T1, T3 |
+| best | 37 | 53 | p-use | 37 → 38 → 49 → 50 → 53 | T5 |
+| best | 43 | 42 | p-use | 43 → 38 → 39 → 41 → 42 | T3 |
+| best | 43 | 53 | p-use | 43 → 38 → 49 → 50 → 53 | T1, T3 |
+| score | 49 | 56 | c-use | 49 → 50 → 53 → 56 | T1 |
+| score | 49 | 54 | c-use | 49 → 50 → 53 → 54 | T3 |
+| score | 51 | 54 | c-use | 51 → 53 → 54 | T4 |
+| score | 51 | 56 | c-use | 51 → 53 → 56 | T2 |
+| score | 54 | 56 | c-use | 54 → 56 | T3, T4 |
 
-## Mutation Testing
+**Дутуу шинжилгээ:** `streak`-ийн 46-р мөрийн тодорхойлолтоос дараагийн давталтын 42, 43-р мөр хүртэлх боломжит зам, `streak`-ийн 36-р мөрөөс 42, 43-р мөр хүрэх боломж, нөхцлийн T/F салаанууд, боломжгүй (`infeasible`) хосуудын тайлбар болон `kill`-ээр тасарсан замыг тусад нь бүрэн шалгах. Хүснэгт дэх тестийн ID бүрийн хамралтыг мөн баталгаажуулах.
 
-Three mutations were introduced temporarily into `DataFlowTargets.java`. After each experiment, the original source code was restored using `git restore`.
+### 4.5 Definition kill
 
-| Mutation | Modification | Tests run | Failed | Result |
+- **40-р мөр:** `present` хувьсагчийн өмнөх утгыг шинэчилнэ.
+- **41-р мөр:** `streak` хувьсагчийн өмнөх утгыг шинэчилнэ.
+- **46-р мөр:** `streak = 0` гэж оноож өмнөх тодорхойлолтыг устгана.
+- **43-р мөр:** `best` хувьсагчийн өмнөх утгыг шинэчилнэ.
+- **51-р мөр:** `score` хувьсагчийн 49-р мөрийн тодорхойлолтыг устгана.
+- **54-р мөр:** `score` хувьсагчид дахин утга онооно.
+
+Жишээлбэл, `streak` хувьсагч 41-р мөрөнд тодорхойлогдсоныхоо дараа 46-р мөрөөр дамжвал өмнөх тодорхойлолт нь устна. Дараагийн 41-р мөрийн оноолт мөн шинэ тодорхойлолт үүсгэнэ.
+
+### 4.6 All-defs ба all-DU-pairs хоёр үе шат
+
+**Нотолгоо шаардлагатай:** Даалгаварт all-defs болон all-DU-pairs тестийг тусдаа үе шат, тусдаа Git commit-аар хийхийг шаардсан. Одоогийн мэдэгдэж буй 11 тестийн эцсийн үр дүнг all-defs-ийн тусдаа үе шат байсан гэж тайлбарлахгүй. `results/mvn-verify-alldefs.txt` болон `results/jacoco-alldefs.csv` файлын бодит агуулга, тухайн үеийн commit түүх, хамгийн цөөн тестийн үндэслэлийг нягтлах шаардлагатай.
+
+### 4.7 Branch хамралт ба DU хамралтын ялгаа
+
+JaCoCo тайланд 16 branch хамрагдаж, 0 branch алдагдсан байна. Гэхдээ JaCoCo нь DU хосын хамралтыг шууд хэмждэггүй. Branch хамралт нь нөхцлийн салаа гүйцэтгэгдсэн эсэхийг харуулдаг бол DU шинжилгээ нь тодорхой нэг `def`-ээс `use` хүртэл `def-clear` зам бодитоор гүйцэтгэгдсэн эсэхийг шалгана. Иймээс 100% branch хамралттай байлаа ч зарим DU хос хамрагдаагүй үлдэж болно.
+
+## 5. Хэсэг C — Fault seeding (мутацийн туршилт)
+
+`DataFlowTargets.java` файлд M1, M2, M3 өөрчлөлтийг нэг нэгээр нь түр оруулж, JUnit тестүүдийг ажиллуулсан. Туршилт бүрийн дараа `git restore` ашиглан эх кодыг буцаасан. Мутацуудыг commit хийгээгүй.
+
+| Мутаци | Түр өөрчлөлт | Нийт тест | Унасан | Үр дүн |
 |---|---|---:|---:|---|
-| M1 | Remove `streak = streak + 1` | 11 | 2 | Detected |
-| M2 | Replace `best = streak` with `best = present` | 11 | 1 | Detected |
-| M3 | Add `int total = present + best;` after the loop | 11 | 0 | Survived |
+| M1 | `streak = streak + 1` мөрийг устгасан | 11 | 2 | Илрүүлсэн |
+| M2 | `best = streak` → `best = present` | 11 | 1 | Илрүүлсэн |
+| M3 | Давталтын дараа `int total = present + best;` нэмсэн | 11 | 0 | Илрээгүй |
 
-### M1 — Missing Update
+### M1 — Missing update
 
-Two tests failed:
+`streak` хувьсагч нэмэгдэхээ больсноор дараалсан ирцийн 3 оноо олгогдохгүй болсон. Дараах хоёр тест унасан:
 
 - `bonus_bothConditionsMet_returnsEight`: expected 8, actual 5.
 - `bonus_fiveConsecutive_returnsThree`: expected 3, actual 0.
 
-Removing the update prevented `streak` from increasing. Consequently, the program failed to award the additional three points for five consecutive attendance days.
+Нотолгоо: `results/mvn-test-M1.txt`.
 
-Evidence: `results/mvn-test-M1.txt`
+### M2 — Wrong variable
 
-### M2 — Wrong Variable
-
-One test failed:
+`best`-д дараалсан ирцийн `streak` утгын оронд нийт ирцийн `present` утгыг оноосон. Иймээс тасалдалтай ирцэд 3 оноо буруу нэмэгдсэн.
 
 - `bonus_streakReset_returnsZero`: expected 0, actual 3.
 
-The mutation incorrectly assigned `present` to `best`. Because `present` counts all attended days rather than consecutive days, the program incorrectly awarded three bonus points.
+M2-ийг өмнө нь бичсэн тест илрүүлсэн тул нэмэлт M2-kill тест шаардагдаагүй. Нотолгоо: `results/mvn-test-M2.txt`.
 
-The existing test detected M2, so an additional M2-killing test was unnecessary.
+### M3 — Dead definition
 
-Evidence: `results/mvn-test-M2.txt`
+`int total = present + best;` гэсэн ашиглагдаагүй хувьсагч нэмэхэд 11 тест бүгд амжилттай ажилласан. `total` нь буцаах үр дүнд нөлөөлөхгүй тул JUnit тест үүнийг илрүүлээгүй. Ашиглагдаагүй локал хувьсагчийг статик шинжилгээ эсвэл IDE-ийн inspection илрүүлэх боломжтой.
 
-### M3 — Dead Definition
+**Нэмэх шаардлагатай:** IDE дээр харагдсан бодит анхааруулгын үгийг шалгаж энд хуулна; анхааруулга үзсэн гэж одоогоор мэдэгдээгүй.
 
-All 11 tests passed.
+Нотолгоо: `results/mvn-test-M3.txt`.
 
-The mutation introduced an unused variable:
+### Эцсийн баталгаажуулалт
 
-`int total = present + best;`
+Эх кодыг сэргээсний дараа `mvn verify` амжилттай ажилласан: 11 тест, 0 алдаа, 16/16 branch, 23 covered line, 1 missed line.
 
-This assignment does not affect the returned value. Therefore, the existing JUnit tests could not detect the mutation.
+Нотолгоо: `results/mvn-verify-final.txt`, `results/jacoco-final.csv`.
 
-Static analysis or an IDE inspection can identify the unused local variable. The actual inspection warning should be recorded separately after checking the IDE.
+## 6. Дүгнэлт
 
-Evidence: `results/mvn-test-M3.txt`
+Энэ лабораторийн ажлаар хувьсагчийн тодорхойлолт болон хэрэглээний хоорондын замыг шинжлэх нь зөвхөн branch хамралт шалгахаас илүү нарийн мэдээлэл өгдгийг харлаа. `gcd()` функцэд 11 DU хосыг тодорхойлж, тэдгээрийг JUnit тестүүдтэй холбон судалсан. `bonus()` функцэд олон хувьсагч дахин тодорхойлогддог тул `kill` болон `def-clear` замыг ялгахад анхаарах шаардлагатай байв. Эцсийн тестүүд 100% branch хамралт үзүүлсэн ч энэ нь бүх DU хос хамрагдсаныг дангаараа нотлохгүй. M1 мутацийг хоёр тест, M2 мутацийг нэг тест илрүүлсэн. Харин M3 мутаци гаралтад нөлөөлөөгүй учраас бүх тест амжилттай ажилласан. Энэ нь динамик тестийг статик шинжилгээтэй хослуулах шаардлагатайг харуулж байна. DU хүснэгтийн def-clear зам болон дахин тодорхойлолтыг шалгах ажил хамгийн нарийн хэсэг байв.
 
-### Final Verification
+## 7. AI туслах ашигласан тухай
 
-After restoring the original source code, Maven verification succeeded.
+AI туслахыг README-ийн бүтэц цэгцлэх, тайлбар монгол хэлээр боловсруулах, DU хүснэгтийн ажлын хувилбар бэлтгэх болон тестийн үр дүнг тайлбарлахад ашигласан. Бодит JUnit болон JaCoCo үр дүнг төслийн `results/` файлуудаас шалгах шаардлагатай; AI-аар гаргасан DU хосуудыг эх кодтой тулган баталгаажуулах ёстой.
 
-- Tests run: 11
-- Failures: 0
-- Errors: 0
-- Skipped: 0
-- Branches covered: 16
-- Branches missed: 0
-- Lines covered: 23
-- Lines missed: 1
+## 8. Илгээхээс өмнөх шалгах зүйлс
 
-The single missed line corresponds to the implicit constructor.
-
-Evidence:
-- `results/mvn-verify-final.txt`
-- `results/jacoco-final.csv`
-
-These experiments demonstrate that data-flow faults can produce incorrect results, while dead definitions may remain undetected by dynamic testing.
+- [ ] `java -version`, `mvn -version` командын бүтэн гаралтыг нэмэх
+- [ ] GCD хүснэгтэд Test ID болон хамрагдсан эсэх багана нэмэх
+- [ ] Bonus DU хүснэгтийн бүрэн байдлыг, T/F салаа болон infeasible замуудыг шалгах
+- [ ] CFG-ийн ирмэгүүдийн тестийн нэрийг шалгах
+- [ ] All-defs үе шатны бодит тест, хамралт, commit түүхийг баталгаажуулах
+- [ ] M3-ийн IDE анхааруулгын бодит текстийг нэмэх
+- [ ] GitHub дээр `results/`, `cfg-bonus.png`, `README.md` байгааг шалгах
+- [ ] Шинэ хавтас руу clone хийгээд `mvn verify` ажиллуулах
+- [ ] Teams Assignment-д GitHub репогийн үндсэн холбоосыг оруулаад **Turn in** дарах
