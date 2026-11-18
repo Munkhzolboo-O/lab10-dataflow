@@ -7,9 +7,26 @@
 
 Энэ лабораторийн ажлаар `gcd()` болон `bonus()` функцийн хувьсагчдын тодорхойлолт (`def`), хэрэглээ (`use`), тэдгээрийн хоорондох `def-clear` замыг шинжилж, JUnit 5 тест болон JaCoCo тайлангаар шалгав. Ашигласан хэрэгслүүд: Java 17+, Maven, JUnit 5, JaCoCo, Git.
 
-### Java болон Maven-ийн орчны гаралт
 
-**Нэмэх шаардлагатай:** Өөрийн компьютер дээр ажиллуулсан `java -version` болон `mvn -version` командын **бүтэн, бодит гаралтыг** энд оруулна. Зөвхөн хувилбарын дугаар бичих нь хангалтгүй.
+### Java болон Maven хувилбарын мэдээлэл
+
+**`java -version` командын гаралт:**
+
+```text
+openjdk version "17.0.20.1" 2026-08-18 LTS
+OpenJDK Runtime Environment Microsoft-14940689 (build 17.0.20.1+1-LTS)
+OpenJDK 64-Bit Server VM Microsoft-14940689 (build 17.0.20.1+1-LTS, mixed mode, sharing)
+```
+
+**`mvn -version` командын гаралт:**
+
+```text
+Apache Maven 3.9.16 (2bdd9fddda4b155ebf8000e807eb73fd829a51d5)
+Maven home: C:\maven\apache-maven-3.9.16
+Java version: 17.0.20.1, vendor: Microsoft, runtime: C:\Program Files\Microsoft\jdk-17.0.20.101-hotspot
+Default locale: en_US, platform encoding: Cp1252
+OS name: "windows 11", version: "10.0", arch: "amd64", family: "windows"
+```
 
 ## 2. Эцсийн шалгалтын үр дүн
 
