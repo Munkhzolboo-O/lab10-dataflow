@@ -41,8 +41,6 @@ The gcd() method contains 11 DU pairs.
 
 ## Bonus DU-Pair Analysis
 
-## Bonus DU-Pair Analysis
-
 D = definition, U = use.
 c-use = computation use, p-use = predicate use.
 A kill occurs when a variable is redefined.
@@ -76,6 +74,71 @@ A kill occurs when a variable is redefined.
 - Negative threshold
 
 
+
 ## Mutation Testing
 
-To be completed.
+Three mutations were introduced temporarily into `DataFlowTargets.java`. After each experiment, the original source code was restored using `git restore`.
+
+| Mutation | Modification | Tests run | Failed | Result |
+|---|---|---:|---:|---|
+| M1 | Remove `streak = streak + 1` | 11 | 2 | Detected |
+| M2 | Replace `best = streak` with `best = present` | 11 | 1 | Detected |
+| M3 | Add `int total = present + best;` after the loop | 11 | 0 | Survived |
+
+### M1 — Missing Update
+
+Two tests failed:
+
+- `bonus_bothConditionsMet_returnsEight`: expected 8, actual 5.
+- `bonus_fiveConsecutive_returnsThree`: expected 3, actual 0.
+
+Removing the update prevented `streak` from increasing. Consequently, the program failed to award the additional three points for five consecutive attendance days.
+
+Evidence: `results/mvn-test-M1.txt`
+
+### M2 — Wrong Variable
+
+One test failed:
+
+- `bonus_streakReset_returnsZero`: expected 0, actual 3.
+
+The mutation incorrectly assigned `present` to `best`. Because `present` counts all attended days rather than consecutive days, the program incorrectly awarded three bonus points.
+
+The existing test detected M2, so an additional M2-killing test was unnecessary.
+
+Evidence: `results/mvn-test-M2.txt`
+
+### M3 — Dead Definition
+
+All 11 tests passed.
+
+The mutation introduced an unused variable:
+
+`int total = present + best;`
+
+This assignment does not affect the returned value. Therefore, the existing JUnit tests could not detect the mutation.
+
+Static analysis or an IDE inspection can identify the unused local variable. The actual inspection warning should be recorded separately after checking the IDE.
+
+Evidence: `results/mvn-test-M3.txt`
+
+### Final Verification
+
+After restoring the original source code, Maven verification succeeded.
+
+- Tests run: 11
+- Failures: 0
+- Errors: 0
+- Skipped: 0
+- Branches covered: 16
+- Branches missed: 0
+- Lines covered: 23
+- Lines missed: 1
+
+The single missed line corresponds to the implicit constructor.
+
+Evidence:
+- `results/mvn-verify-final.txt`
+- `results/jacoco-final.csv`
+
+These experiments demonstrate that data-flow faults can produce incorrect results, while dead definitions may remain undetected by dynamic testing.
